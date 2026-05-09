@@ -9,6 +9,7 @@ import watchmate.dto.CreateUserListRequest;
 import watchmate.dto.UserListItemResponse;
 import watchmate.dto.UserListResponse;
 import watchmate.service.UserListService;
+import watchmate.security.CurrentUserProvider;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,47 +20,41 @@ import java.util.UUID;
 public class UserListController {
 
     private final UserListService userListService;
+    private final CurrentUserProvider currentUserProvider;
 
-    @PostMapping("/user/{userId}")
-    public ResponseEntity<UserListResponse> createList(
-            @PathVariable UUID userId,
-            @RequestBody CreateUserListRequest request
-    ) {
-        UserListResponse response = userListService.createList(userId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @PostMapping
+    public ResponseEntity<UserListResponse> createList(@RequestBody CreateUserListRequest request) {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userListService.createList(userId, request));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<UserListResponse>> getUserLists(@PathVariable UUID userId) {
-        List<UserListResponse> response = userListService.getUserLists(userId);
-        return ResponseEntity.ok(response);
+    @GetMapping("/me")
+    public ResponseEntity<List<UserListResponse>> getMyLists() {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.ok(userListService.getUserLists(userId));
     }
 
-    @PostMapping("/{listId}/user/{userId}/items")
+    @PostMapping("/{listId}/items")
     public ResponseEntity<UserListItemResponse> addTitleToList(
-            @PathVariable UUID userId,
             @PathVariable Long listId,
-            @RequestBody AddTitleToListRequest request
-    ) {
-        UserListItemResponse response = userListService.addTitleToList(userId, listId, request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            @RequestBody AddTitleToListRequest request) {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(userListService.addTitleToList(userId, listId, request));
     }
 
-    @GetMapping("/{listId}/user/{userId}/items")
-    public ResponseEntity<List<UserListItemResponse>> getListItems(
-            @PathVariable UUID userId,
-            @PathVariable Long listId
-    ) {
-        List<UserListItemResponse> response = userListService.getListItems(userId, listId);
-        return ResponseEntity.ok(response);
+    @GetMapping("/{listId}/items")
+    public ResponseEntity<List<UserListItemResponse>> getListItems(@PathVariable Long listId) {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.ok(userListService.getListItems(userId, listId));
     }
 
-    @DeleteMapping("/{listId}/user/{userId}/items/{titleId}")
+    @DeleteMapping("/{listId}/items/{titleId}")
     public ResponseEntity<Void> removeTitleFromList(
-            @PathVariable UUID userId,
             @PathVariable Long listId,
-            @PathVariable Long titleId
-    ) {
+            @PathVariable Long titleId) {
+        UUID userId = currentUserProvider.getCurrentUserId();
         userListService.removeTitleFromList(userId, listId, titleId);
         return ResponseEntity.noContent().build();
     }

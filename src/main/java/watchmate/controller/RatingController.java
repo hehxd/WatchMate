@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import watchmate.dto.RatingRequest;
 import watchmate.dto.RatingResponse;
 import watchmate.service.RatingService;
+import watchmate.security.CurrentUserProvider;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,33 +17,28 @@ import java.util.UUID;
 public class RatingController {
 
     private final RatingService ratingService;
+    private final CurrentUserProvider currentUserProvider;
 
-    @PostMapping("/user/{userId}")
-    public ResponseEntity<RatingResponse> saveRating(
-            @PathVariable UUID userId,
-            @RequestBody RatingRequest request
-    ) {
-        RatingResponse response = ratingService.saveRating(userId, request);
-        return ResponseEntity.ok(response);
+    @PostMapping
+    public ResponseEntity<RatingResponse> saveRating(@RequestBody RatingRequest request) {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.ok(ratingService.saveRating(userId, request));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<RatingResponse>> getRatingsByUser(@PathVariable UUID userId) {
-        List<RatingResponse> response = ratingService.getRatingsByUser(userId);
-        return ResponseEntity.ok(response);
+    @GetMapping("/me")
+    public ResponseEntity<List<RatingResponse>> getMyRatings() {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.ok(ratingService.getRatingsByUser(userId));
     }
 
     @GetMapping("/title/{titleId}")
     public ResponseEntity<List<RatingResponse>> getRatingsByTitle(@PathVariable Long titleId) {
-        List<RatingResponse> response = ratingService.getRatingsByTitle(titleId);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ratingService.getRatingsByTitle(titleId));
     }
 
-    @DeleteMapping("/user/{userId}/title/{titleId}")
-    public ResponseEntity<Void> deleteRating(
-            @PathVariable UUID userId,
-            @PathVariable Long titleId
-    ) {
+    @DeleteMapping("/title/{titleId}")
+    public ResponseEntity<Void> deleteRating(@PathVariable Long titleId) {
+        UUID userId = currentUserProvider.getCurrentUserId();
         ratingService.deleteRating(userId, titleId);
         return ResponseEntity.noContent().build();
     }

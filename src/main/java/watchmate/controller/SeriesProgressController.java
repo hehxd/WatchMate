@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import watchmate.dto.SeriesProgressRequest;
 import watchmate.dto.SeriesProgressResponse;
 import watchmate.service.SeriesProgressService;
+import watchmate.security.CurrentUserProvider;
 
 import java.util.List;
 import java.util.UUID;
@@ -16,19 +17,18 @@ import java.util.UUID;
 public class SeriesProgressController {
 
     private final SeriesProgressService seriesProgressService;
+    private final CurrentUserProvider currentUserProvider;
 
-    @PostMapping("/user/{userId}")
+    @PostMapping
     public ResponseEntity<SeriesProgressResponse> saveProgress(
-            @PathVariable UUID userId,
-            @RequestBody SeriesProgressRequest request
-    ) {
-        SeriesProgressResponse response = seriesProgressService.saveProgress(userId, request);
-        return ResponseEntity.ok(response);
+            @RequestBody SeriesProgressRequest request) {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.ok(seriesProgressService.saveProgress(userId, request));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<SeriesProgressResponse>> getUserProgress(@PathVariable UUID userId) {
-        List<SeriesProgressResponse> response = seriesProgressService.getUserProgress(userId);
-        return ResponseEntity.ok(response);
+    @GetMapping("/me")
+    public ResponseEntity<List<SeriesProgressResponse>> getMyProgress() {
+        UUID userId = currentUserProvider.getCurrentUserId();
+        return ResponseEntity.ok(seriesProgressService.getUserProgress(userId));
     }
 }
