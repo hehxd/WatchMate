@@ -3,11 +3,13 @@ package watchmate.service.implementation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import watchmate.dto.AuthResponse;
 import watchmate.dto.LoginRequest;
 import watchmate.dto.RegisterRequest;
 import watchmate.model.User;
 import watchmate.repository.UserRepository;
+import watchmate.security.JwtService;
 import watchmate.service.AuthService;
 
 @Service
@@ -16,6 +18,7 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -33,12 +36,13 @@ public class AuthServiceImpl implements AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
 
         User savedUser = userRepository.save(user);
+        String token = jwtService.generateToken(savedUser);
 
         return new AuthResponse(
                 savedUser.getId(),
                 savedUser.getUsername(),
                 savedUser.getEmail(),
-                "dummy-token"
+                token
         );
     }
 
@@ -51,11 +55,13 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Invalid email or password");
         }
 
+        String token = jwtService.generateToken(user);
+
         return new AuthResponse(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                "dummy-token"
+                token
         );
     }
 }
