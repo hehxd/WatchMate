@@ -1,5 +1,3 @@
-import React from 'react';
-
 export default function LandingPage({setView}) {
     return (
         <div className="text-center animate-fade-in">

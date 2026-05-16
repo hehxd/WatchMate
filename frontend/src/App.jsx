@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import BackgroundGlows from './components/BackgroundGlows';
 import LandingPage from './pages/LandingPage';
 import LoginPage from './pages/LoginPage';
@@ -14,21 +14,40 @@ import { authFetch } from './api/api';
 export default function App() {
     const [view, setView] = useState('landing');
     const [selectedMovieId, setSelectedMovieId] = useState(null);
+    const [moviesDB, setMoviesDB] = useState([]);
 
     const [currentUser, setCurrentUser] = useState(() => {
         const savedUser = localStorage.getItem('watchmate_user');
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
-    const [moviesDB, setMoviesDB] = useState([]);
+    const navigateTo = (newView) => {
+        const token = localStorage.getItem('watchmate_token');
+        const protectedViews = ['dashboard', 'movie_details', 'friends_reviews',
+            'profile', 'edit_profile', 'to_watch',
+            'my_reviews', 'my_watched'];
+
+        if (protectedViews.includes(newView) && !token) {
+            setView('landing');
+            localStorage.setItem('watchmate_view', 'landing');
+            return;
+        }
+
+        setView(newView);
+        localStorage.setItem('watchmate_view', newView);
+        window.history.pushState({ page: newView }, '', `?view=${newView}`);
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('watchmate_token');
-        const protectedViews = ['dashboard', 'movie_details', 'friends_reviews', 
-                                'profile', 'edit_profile', 'to_watch', 
-                                'my_reviews', 'my_watched'];
+        const protectedViews = ['dashboard', 'movie_details', 'friends_reviews',
+            'profile', 'edit_profile', 'to_watch',
+            'my_reviews', 'my_watched'];
+
         if (protectedViews.includes(view) && !token) {
-            navigateTo('landing');
+            setTimeout(() => {
+                setView('landing');
+            }, 0);
         }
     }, [view]);
 
@@ -47,7 +66,7 @@ export default function App() {
 
         const protectedViews = ['dashboard', 'friends_reviews', 'profile'];
         if (protectedViews.includes(view)) {
-            fetchTitles();
+            fetchTitles().catch(err => console.error(err));
         }
     }, [view]);
 
@@ -58,12 +77,6 @@ export default function App() {
         setCurrentUser(null);
         setMoviesDB([]);
         navigateTo('landing');
-    };
-
-    const navigateTo = (newView) => {
-        setView(newView);
-        localStorage.setItem('watchmate_view', newView);
-        window.history.pushState({ page: newView }, '', `?view=${newView}`);
     };
 
     useEffect(() => {
@@ -77,9 +90,9 @@ export default function App() {
         return () => window.removeEventListener('popstate', handleBackButton);
     }, []);
 
-    const protectedLayout = ['dashboard', 'movie_details', 'friends_reviews', 
-                             'profile', 'edit_profile', 'to_watch', 
-                             'my_reviews', 'my_watched'];
+    const protectedLayout = ['dashboard', 'movie_details', 'friends_reviews',
+        'profile', 'edit_profile', 'to_watch',
+        'my_reviews', 'my_watched'];
 
     return (
         <div className="relative min-h-screen font-sans antialiased text-white bg-[#0a0a0a] overflow-hidden flex flex-col">
@@ -90,19 +103,19 @@ export default function App() {
                     <div className="overflow-y-auto h-screen w-full">
                         {view === 'dashboard' &&
                             <DashboardPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                           movies={moviesDB} currentUser={currentUser} />}
+                                           movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
                         {view === 'friends_reviews' &&
                             <FriendsReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                                movies={moviesDB} currentUser={currentUser} />}
+                                                movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
                         {view === 'movie_details' &&
                             <MovieDetailsPage setView={navigateTo} movieId={selectedMovieId}
-                                              currentUser={currentUser} />}
+                                              currentUser={currentUser} onLogout={handleLogout} />}
                         {view === 'profile' &&
                             <ProfilePage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                         movies={moviesDB} currentUser={currentUser} />}
+                                         movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
                         {view === 'edit_profile' &&
                             <EditProfilePage setView={navigateTo} currentUser={currentUser}
-                                             setCurrentUser={setCurrentUser} />}
+                                             setCurrentUser={setCurrentUser} onLogout={handleLogout} />}
 
                         {(view === 'to_watch' || view === 'my_reviews' || view === 'my_watched') && (
                             <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
@@ -113,7 +126,7 @@ export default function App() {
                                     <h1 className="text-3xl font-black text-white mb-2">Coming Soon</h1>
                                     <p className="text-gray-400 mb-6">This feature is currently under development.</p>
                                     <button onClick={() => navigateTo('dashboard')}
-                                        className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold text-white transition-all">
+                                            className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold text-white transition-all">
                                         Back to Dashboard
                                     </button>
                                 </main>

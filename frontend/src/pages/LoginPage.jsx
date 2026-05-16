@@ -1,5 +1,4 @@
-import React, {useState} from 'react';
-
+import { useState } from 'react';
 export default function LoginPage({setView, setCurrentUser}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
