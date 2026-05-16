@@ -1,24 +1,70 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import { authFetch } from '../api/api';
 
-export default function DashboardPage({ setView, setSelectedMovieId, movies, currentUser, onLogout }) {
+export default function DashboardPage({ setView, setSelectedMovieId, movies = [], currentUser, onLogout }) {
     const [searchQuery, setSearchQuery] = useState('');
-    const [myRecentReviews, setMyRecentReviews] = useState([]);
+    const [watchingList, setWatchingList] = useState([]);
+    const [reviewedMovies, setReviewedMovies] = useState([]);
+    const fetchedRef = useRef(false);
 
     useEffect(() => {
-        const fetchMyReviews = async () => {
+        if (movies.length === 0 || !currentUser?.name) return;
+
+        if (fetchedRef.current) return;
+        fetchedRef.current = true;
+
+        const fetchReviews = async () => {
+            const candidates = movies.slice(0, 50);
+            const foundReviews = [];
+
+            for (let i = 0; i < candidates.length; i += 5) {
+                const batch = candidates.slice(i, i + 5);
+                const results = await Promise.all(
+                    batch.map(async (movie) => {
+                        try {
+                            const res = await authFetch(`/reviews/title/${movie.id}`);
+                            if (res.ok) {
+                                const reviews = await res.json();
+                                if (reviews.length > 0) {
+                                    const friendsReviews = reviews.filter(review => review.username !== currentUser.name);
+                                    if (friendsReviews.length > 0) {
+                                        return { movie, reviews: friendsReviews };
+                                    }
+                                }
+                            }
+                        } catch (err) {
+                        }
+                        return null;
+                    })
+                );
+
+                foundReviews.push(...results.filter(Boolean));
+                if (foundReviews.length >= 4) break;
+            }
+
+            setReviewedMovies(foundReviews.slice(0, 4));
+        };
+
+        fetchReviews();
+    }, [movies, currentUser]);
+
+    useEffect(() => {
+        const fetchWatching = async () => {
             try {
-                const res = await authFetch('/reviews/me');
+                const res = await authFetch('/series-progress');
                 if (res.ok) {
                     const data = await res.json();
-                    setMyRecentReviews(data.slice(0, 2));
+                    const inProgress = data.filter(item =>
+                        item.status === 'WATCHING' || item.status === 'IN_PROGRESS'
+                    );
+                    setWatchingList(inProgress.slice(0, 10));
                 }
             } catch (err) {
-                console.error('Failed to fetch reviews', err);
             }
         };
-        fetchMyReviews();
+
+        fetchWatching();
     }, []);
 
     const searchResults = movies.filter(movie =>
@@ -30,8 +76,15 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies, cur
         setView('movie_details');
     };
 
-    const getMovieForReview = (review) => {
-        return movies.find(m => m.id === review.titleId);
+    const getMovieById = (id) => {
+        return movies.find(m => m.id === id);
+    };
+
+    const getProgress = (item) => {
+        const total = item.totalEpisodes ?? item.episodesTotal ?? 0;
+        const watched = item.currentEpisode ?? item.watchedEpisodes ?? 0;
+        if (!total || total === 0) return 0;
+        return Math.round((watched / total) * 100);
     };
 
     return (
@@ -64,7 +117,7 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies, cur
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {searchResults.map(movie => (
                                     <div key={movie.id} onClick={() => handleMovieClick(movie)}
-                                        className="p-6 bg-[#0a0a0a]/80 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 hover:-translate-y-1 cursor-pointer transition-all">
+                                         className="p-6 bg-[#0a0a0a]/80 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 hover:-translate-y-1 cursor-pointer transition-all">
                                         <div className="flex justify-between items-start mb-2">
                                             <h3 className="font-bold text-xl text-white">{movie.title}</h3>
                                             <span className="text-gray-500 font-bold">{movie.yearText}</span>
@@ -82,36 +135,67 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies, cur
                     </div>
                 ) : (
                     <div className="animate-fade-in space-y-12">
+
                         <div>
                             <div className="flex justify-between items-center border-b border-white/10 pb-2 mb-6">
                                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                    <span>⭐</span> My Recent Reviews
+                                    <span>👥</span> Friends' Reviews
                                 </h2>
-                                <button onClick={() => setView('my_reviews')}
-                                    className="text-sm text-red-500 hover:text-white font-bold transition-colors">
+                                <button onClick={() => setView('friends_reviews')}
+                                        className="text-sm text-red-500 hover:text-white font-bold transition-colors">
                                     See all →
                                 </button>
                             </div>
 
-                            {myRecentReviews.length > 0 ? (
+                            {reviewedMovies.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {myRecentReviews.map(review => {
-                                        const movie = getMovieForReview(review);
+                                    {reviewedMovies.map(({ movie, reviews }) => {
+                                        const latestReview = reviews[reviews.length - 1];
+                                        const reviewerName = latestReview.username || 'Anonymous';
+                                        const reviewText = latestReview.commentText || 'No comment provided.';
+
                                         return (
-                                            <div key={review.id}
-                                                onClick={() => movie && handleMovieClick(movie)}
-                                                className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-white/30 cursor-pointer transition-all flex flex-col justify-between group">
-                                                <div>
-                                                    <div className="flex justify-between items-start mb-2">
-                                                        <h3 className="font-bold text-xl text-white group-hover:text-red-400 transition-colors">
-                                                            {movie?.title || 'Unknown Title'}
-                                                        </h3>
-                                                        <span className="text-xs font-bold px-2 py-1 bg-white/5 border border-white/10 text-gray-300 rounded uppercase tracking-wider">
-                                                            {movie?.yearText}
-                                                        </span>
+                                            <div key={movie.id} onClick={() => handleMovieClick(movie)}
+                                                 className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 cursor-pointer transition-all hover:-translate-y-1 group flex overflow-hidden h-48 shadow-lg">
+
+                                                <div className="w-32 flex-shrink-0 bg-[#0a0a0a] relative">
+                                                    {movie.posterUrl ? (
+                                                        <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-white/5 text-3xl border-r border-white/10">🎬</div>
+                                                    )}
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/90 md:to-transparent"></div>
+                                                </div>
+
+                                                <div className="p-4 flex flex-col justify-between flex-grow min-w-0">
+                                                    <div>
+                                                        <div className="flex justify-between items-start mb-1">
+                                                            <h3 className="font-bold text-lg text-white group-hover:text-red-400 transition-colors truncate pr-2">
+                                                                {movie.title}
+                                                            </h3>
+                                                        </div>
+                                                        <div className="flex items-center gap-2 mb-3">
+                                                            <span className="text-[10px] px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded uppercase tracking-wider font-bold">
+                                                                {movie.type}
+                                                            </span>
+                                                            <span className="text-xs text-gray-500">{movie.yearText}</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="mt-2 border-l-2 border-red-500 pl-3">
-                                                        <p className="text-sm text-gray-300 italic line-clamp-2">"{review.commentText}"</p>
+
+                                                    <div className="bg-[#0a0a0a]/60 rounded-xl p-3 border border-white/5 relative mt-auto">
+                                                        <div className="absolute -top-2 left-4 w-3 h-3 bg-[#0a0a0a]/60 border-t border-l border-white/5 rotate-45"></div>
+                                                        <p className="text-sm text-gray-300 italic line-clamp-2 relative z-10 leading-snug">
+                                                            "{reviewText}"
+                                                        </p>
+                                                        <div className="mt-2 flex items-center gap-1.5">
+                                                            <div className="w-5 h-5 rounded-full bg-red-500/20 border border-red-500/40 flex items-center justify-center text-[10px] font-black text-red-400 uppercase flex-shrink-0">
+                                                                {reviewerName[0]?.toUpperCase() || '?'}
+                                                            </div>
+                                                            <span className="text-xs font-bold text-red-400">{reviewerName}</span>
+                                                            {reviews.length > 1 && (
+                                                                <span className="ml-auto text-[10px] text-gray-600">+{reviews.length - 1} more</span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
@@ -120,11 +204,75 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies, cur
                                 </div>
                             ) : (
                                 <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/20">
-                                    <p className="text-gray-400 font-bold text-lg mb-1">No reviews yet.</p>
-                                    <p className="text-sm text-gray-500">Search for a movie and be the first to drop a review!</p>
+                                    <p className="text-gray-400 font-bold text-lg mb-1">No friends' reviews yet.</p>
+                                    <p className="text-sm text-gray-500">Wait for your friends to review a title!</p>
                                 </div>
                             )}
                         </div>
+
+                        <div>
+                            <div className="flex justify-between items-center border-b border-white/10 pb-2 mb-6">
+                                <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                                    <span>▶️</span> Currently Watching
+                                </h2>
+                                <button onClick={() => setView('my_watched')}
+                                        className="text-sm text-red-500 hover:text-white font-bold transition-colors">
+                                    See all →
+                                </button>
+                            </div>
+
+                            {watchingList.length > 0 ? (
+                                <div className="flex gap-4 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide snap-x snap-mandatory">
+                                    {watchingList.map(item => {
+                                        const titleId = item.titleId ?? item.title?.id;
+                                        const movie = getMovieById(titleId);
+                                        const progress = getProgress(item);
+                                        return (
+                                            <div key={item.id}
+                                                 onClick={() => movie && handleMovieClick(movie)}
+                                                 className="flex-none w-[280px] snap-start p-5 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/40 cursor-pointer transition-all group flex flex-col gap-4">
+
+                                                <div>
+                                                    <h3 className="font-bold text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                                                        {movie?.title || item.titleTitle || 'Unknown Series'}
+                                                    </h3>
+                                                    <span className="text-xs text-gray-500">{movie?.yearText}</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 text-sm">
+                                                    <span className="px-2 py-1 bg-red-500/15 border border-red-500/30 text-red-400 rounded-lg font-bold text-xs">
+                                                        S{String(item.currentSeason ?? 1).padStart(2, '0')}
+                                                    </span>
+                                                    <span className="text-gray-300 font-bold">
+                                                        Ep {item.currentEpisode ?? item.watchedEpisodes ?? 0}
+                                                        <span className="text-gray-600"> / {item.totalEpisodes ?? '?'}</span>
+                                                    </span>
+                                                </div>
+
+                                                <div>
+                                                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                                        <span>Progress</span>
+                                                        <span className="text-red-400 font-bold">{progress}%</span>
+                                                    </div>
+                                                    <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full transition-all duration-500"
+                                                            style={{ width: `${progress}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 bg-white/5 rounded-2xl border border-dashed border-white/20">
+                                    <p className="text-gray-400 font-bold text-lg mb-1">Nothing in progress.</p>
+                                    <p className="text-sm text-gray-500">Start tracking a series to see your progress here!</p>
+                                </div>
+                            )}
+                        </div>
+
                     </div>
                 )}
             </main>

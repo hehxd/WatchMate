@@ -12,8 +12,23 @@ import Navbar from './components/Navbar';
 import { authFetch } from './api/api';
 
 export default function App() {
-    const [view, setView] = useState('landing');
-    const [selectedMovieId, setSelectedMovieId] = useState(null);
+    const protectedLayout = ['dashboard', 'movie_details', 'friends_reviews',
+        'profile', 'edit_profile', 'to_watch',
+        'my_reviews', 'my_watched'];
+
+    const [view, setView] = useState(() => {
+        const savedView = localStorage.getItem('watchmate_view') || 'landing';
+        const token = localStorage.getItem('watchmate_token');
+        if (protectedLayout.includes(savedView) && !token) {
+            return 'landing';
+        }
+        return savedView;
+    });
+
+    const [selectedMovieId, setSelectedMovieId] = useState(() => {
+        return localStorage.getItem('watchmate_movie_id') || null;
+    });
+
     const [moviesDB, setMoviesDB] = useState([]);
 
     const [currentUser, setCurrentUser] = useState(() => {
@@ -23,11 +38,8 @@ export default function App() {
 
     const navigateTo = (newView) => {
         const token = localStorage.getItem('watchmate_token');
-        const protectedViews = ['dashboard', 'movie_details', 'friends_reviews',
-            'profile', 'edit_profile', 'to_watch',
-            'my_reviews', 'my_watched'];
 
-        if (protectedViews.includes(newView) && !token) {
+        if (protectedLayout.includes(newView) && !token) {
             setView('landing');
             localStorage.setItem('watchmate_view', 'landing');
             return;
@@ -39,12 +51,15 @@ export default function App() {
     };
 
     useEffect(() => {
-        const token = localStorage.getItem('watchmate_token');
-        const protectedViews = ['dashboard', 'movie_details', 'friends_reviews',
-            'profile', 'edit_profile', 'to_watch',
-            'my_reviews', 'my_watched'];
+        if (selectedMovieId) {
+            localStorage.setItem('watchmate_movie_id', selectedMovieId);
+        }
+    }, [selectedMovieId]);
 
-        if (protectedViews.includes(view) && !token) {
+    useEffect(() => {
+        const token = localStorage.getItem('watchmate_token');
+
+        if (protectedLayout.includes(view) && !token) {
             setTimeout(() => {
                 setView('landing');
             }, 0);
@@ -64,8 +79,7 @@ export default function App() {
             }
         };
 
-        const protectedViews = ['dashboard', 'friends_reviews', 'profile'];
-        if (protectedViews.includes(view)) {
+        if (protectedLayout.includes(view)) {
             fetchTitles().catch(err => console.error(err));
         }
     }, [view]);
@@ -74,6 +88,7 @@ export default function App() {
         localStorage.removeItem('watchmate_token');
         localStorage.removeItem('watchmate_user');
         localStorage.removeItem('watchmate_view');
+        localStorage.removeItem('watchmate_movie_id');
         setCurrentUser(null);
         setMoviesDB([]);
         navigateTo('landing');
@@ -89,10 +104,6 @@ export default function App() {
         window.addEventListener('popstate', handleBackButton);
         return () => window.removeEventListener('popstate', handleBackButton);
     }, []);
-
-    const protectedLayout = ['dashboard', 'movie_details', 'friends_reviews',
-        'profile', 'edit_profile', 'to_watch',
-        'my_reviews', 'my_watched'];
 
     return (
         <div className="relative min-h-screen font-sans antialiased text-white bg-[#0a0a0a] overflow-hidden flex flex-col">
