@@ -1,0 +1,13 @@
+{
+  "newTitle": {
+    "imdbId": "tt0903747",
+    "title": "Breaking Bad",
+    "type": "series",
+    "yearText": "2008-2013",
+    "plot": "A chemistry teacher turns to manufacturing drugs.",
+    "posterUrl": "https://example.com/breaking-bad.jpg",
+    "imdbRating": "9.5",
+    "totalSeasons": 5
+  },
+  "searchQuery": "Breaking Bad"
+}
