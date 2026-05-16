@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import { authFetch } from '../api/api';
 
@@ -11,20 +11,26 @@ export default function ProfilePage({ setView, setSelectedMovieId, movies, curre
     const initials = currentUser?.initials || 'GU';
 
     useEffect(() => {
+        let isMounted = true;
         const fetchMyReviews = async () => {
             try {
                 const res = await authFetch('/reviews/me');
-                if (res.ok) {
+                if (res.ok && isMounted) {
                     const data = await res.json();
                     setMyReviews(data);
                 }
             } catch (err) {
                 console.error('Failed to fetch reviews', err);
             } finally {
-                setLoading(false);
+                if (isMounted) setLoading(false);
             }
         };
-        fetchMyReviews();
+
+        fetchMyReviews().catch(err => console.error(err));
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const getMovieForReview = (review) => {
@@ -33,11 +39,9 @@ export default function ProfilePage({ setView, setSelectedMovieId, movies, curre
 
     return (
         <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
-
             <Navbar setView={setView} activePage="profile" currentUser={currentUser} onLogout={onLogout} />
 
             <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-12">
-
                 <div className="flex flex-col md:flex-row items-center md:items-start justify-between bg-white/5 backdrop-blur-md p-8 rounded-3xl border border-white/10 mb-12 shadow-xl">
                     <div className="flex flex-col md:flex-row items-center gap-6">
                         <div className="w-28 h-28 rounded-full bg-red-900 border-4 border-red-500 flex items-center justify-center font-black text-4xl text-white shadow-[0_0_20px_rgba(239,68,68,0.4)] uppercase">
@@ -55,7 +59,7 @@ export default function ProfilePage({ setView, setSelectedMovieId, movies, curre
                     </div>
 
                     <button onClick={() => setView('edit_profile')}
-                        className="mt-8 md:mt-0 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-bold text-white transition-all shadow-lg flex items-center gap-2 group">
+                            className="mt-8 md:mt-0 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl font-bold text-white transition-all shadow-lg flex items-center gap-2 group">
                         <span className="group-hover:rotate-12 transition-transform">⚙️</span> Edit Profile
                     </button>
                 </div>
@@ -74,13 +78,13 @@ export default function ProfilePage({ setView, setSelectedMovieId, movies, curre
                                     const movie = getMovieForReview(review);
                                     return (
                                         <div key={review.id}
-                                            onClick={() => {
-                                                if (movie) {
-                                                    setSelectedMovieId(movie.id);
-                                                    setView('movie_details');
-                                                }
-                                            }}
-                                            className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 cursor-pointer transition-all hover:-translate-y-1 group">
+                                             onClick={() => {
+                                                 if (movie) {
+                                                     setSelectedMovieId(movie.id);
+                                                     setView('movie_details');
+                                                 }
+                                             }}
+                                             className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 cursor-pointer transition-all hover:-translate-y-1 group">
                                             <div className="flex justify-between items-start mb-2">
                                                 <h3 className="font-bold text-xl text-white group-hover:text-red-400 transition-colors">
                                                     {movie?.title || 'Unknown Title'}
