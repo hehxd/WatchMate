@@ -1,41 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '../components/Navbar';
 import { authFetch } from '../api/api';
 
-export default function ProfilePage({ setView, setSelectedMovieId, movies, currentUser, onLogout }) {
+export default function ProfilePage({ setView, setSelectedMovieId, movies = [], currentUser, onLogout }) {
     const [myReviews, setMyReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const fetchedRef = useRef(false);
 
     const name = currentUser?.name || 'Guest User';
     const email = currentUser?.email || 'No email provided';
-    const initials = currentUser?.initials || 'GU';
+    const initials = currentUser?.name ? currentUser.name[0] : 'GU';
 
     useEffect(() => {
-        let isMounted = true;
-        const fetchMyReviews = async () => {
-            try {
-                const res = await authFetch('/reviews/me');
-                if (res.ok && isMounted) {
-                    const data = await res.json();
-                    setMyReviews(data);
-                }
-            } catch (err) {
-                console.error('Failed to fetch reviews', err);
-            } finally {
-                if (isMounted) setLoading(false);
-            }
+        if (movies.length === 0 || !currentUser?.name) return;
+
+        if (fetchedRef.current) return;
+        fetchedRef.current = true;
+
+        const fetchReviews = async () => {
+            const candidates = movies.slice(0, 50);
+
+            const results = await Promise.all(
+                candidates.map(async (movie) => {
+                    try {
+                        const res = await authFetch(`/reviews/title/${movie.id}`);
+
+                        if (res.ok) {
+                            const reviews = await res.json();
+
+                            if (reviews.length > 0) {
+                                const myOwnReviews = reviews.filter(review => review.username === currentUser.name);
+
+                                if (myOwnReviews.length > 0) {
+                                    return { movie, reviews: myOwnReviews };
+                                }
+                            }
+                        }
+                    } catch (err) {
+                    }
+                    return null;
+                })
+            );
+
+            setMyReviews(results.filter(Boolean));
+            setLoading(false);
         };
 
-        fetchMyReviews().catch(err => console.error(err));
+        fetchReviews();
+    }, [movies, currentUser]);
 
-        return () => {
-            isMounted = false;
-        };
-    }, []);
-
-    const getMovieForReview = (review) => {
-        return movies.find(m => m.id === review.titleId);
+    const handleMovieClick = (movie) => {
+        setSelectedMovieId(movie.id);
+        setView('movie_details');
     };
+
+    const recentReviews = myReviews.slice(0, 4);
 
     return (
         <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
@@ -52,7 +71,7 @@ export default function ProfilePage({ setView, setSelectedMovieId, movies, curre
                             <p className="text-gray-400 mt-1">{email}</p>
                             <div className="mt-4 flex gap-3 justify-center md:justify-start">
                                 <span className="px-4 py-1.5 bg-red-500/20 text-red-400 rounded-xl text-xs font-bold uppercase tracking-widest border border-red-500/20">
-                                    {myReviews.length} Reviews
+                                    {myReviews.length} Reviews Total
                                 </span>
                             </div>
                         </div>
@@ -70,32 +89,57 @@ export default function ProfilePage({ setView, setSelectedMovieId, movies, curre
                     </h2>
 
                     {loading ? (
-                        <p className="text-gray-400">Loading...</p>
+                        <div className="text-center py-12">
+                            <p className="text-gray-400">Loading...</p>
+                        </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {myReviews.length > 0 ? (
-                                myReviews.map((review) => {
-                                    const movie = getMovieForReview(review);
+                            {recentReviews.length > 0 ? (
+                                recentReviews.map(({ movie, reviews }) => {
+                                    const latestReview = reviews[reviews.length - 1];
+                                    const reviewText = latestReview.commentText || 'No comment provided.';
+
                                     return (
-                                        <div key={review.id}
-                                             onClick={() => {
-                                                 if (movie) {
-                                                     setSelectedMovieId(movie.id);
-                                                     setView('movie_details');
-                                                 }
-                                             }}
-                                             className="p-6 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 cursor-pointer transition-all hover:-translate-y-1 group">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <h3 className="font-bold text-xl text-white group-hover:text-red-400 transition-colors">
-                                                    {movie?.title || 'Unknown Title'}
-                                                </h3>
-                                                <span className="text-xs font-bold px-2 py-1 bg-white/5 border border-white/10 text-gray-300 rounded uppercase tracking-wider">
-                                                    {movie?.yearText}
-                                                </span>
+                                        <div key={movie.id} onClick={() => handleMovieClick(movie)}
+                                             className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 hover:border-red-500/50 cursor-pointer transition-all hover:-translate-y-1 group flex overflow-hidden h-48 shadow-lg">
+
+                                            <div className="w-32 flex-shrink-0 bg-[#0a0a0a] relative">
+                                                {movie.posterUrl ? (
+                                                    <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center bg-white/5 text-3xl border-r border-white/10">🎬</div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/90 md:to-transparent"></div>
                                             </div>
-                                            <div className="mt-4 bg-[#0a0a0a]/50 p-4 rounded-xl border border-white/5">
-                                                <span className="text-xs text-red-400 font-bold uppercase tracking-wider">Your Review</span>
-                                                <p className="text-sm text-gray-300 italic mt-2">"{review.commentText}"</p>
+
+                                            <div className="p-4 flex flex-col justify-between flex-grow min-w-0">
+                                                <div>
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <h3 className="font-bold text-lg text-white group-hover:text-red-400 transition-colors truncate pr-2">
+                                                            {movie.title}
+                                                        </h3>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mb-3">
+                                                        <span className="text-[10px] px-1.5 py-0.5 bg-red-500/20 text-red-400 rounded uppercase tracking-wider font-bold">
+                                                            {movie.type}
+                                                        </span>
+                                                        <span className="text-xs text-gray-500">{movie.yearText}</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="bg-[#0a0a0a]/60 rounded-xl p-3 border border-red-500/20 relative mt-auto">
+                                                    <div className="absolute -top-2 left-4 w-3 h-3 bg-[#0a0a0a]/60 border-t border-l border-red-500/20 rotate-45"></div>
+                                                    <p className="text-sm text-gray-300 italic line-clamp-2 relative z-10 leading-snug">
+                                                        "{reviewText}"
+                                                    </p>
+                                                    <div className="mt-2 flex items-center gap-1.5">
+                                                        <div className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center text-[10px] font-black uppercase flex-shrink-0">
+                                                            {initials}
+                                                        </div>
+                                                        <span className="text-xs font-bold text-white">{name}</span>
+                                                        <span className="text-[10px] bg-red-500 text-white px-1 py-0.5 rounded uppercase tracking-wider scale-90 origin-left font-bold">You</span>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     );

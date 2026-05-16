@@ -6,6 +6,7 @@ import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import MovieDetailsPage from './pages/MovieDetailsPage';
 import FriendsReviewsPage from './pages/FriendsReviewsPage';
+import MyReviewsPage from './pages/MyReviewsPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
 import Navbar from './components/Navbar';
@@ -118,6 +119,9 @@ export default function App() {
                         {view === 'friends_reviews' &&
                             <FriendsReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
                                                 movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
+                        {view === 'my_reviews' &&
+                            <MyReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
+                                           movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
                         {view === 'movie_details' &&
                             <MovieDetailsPage setView={navigateTo} movieId={selectedMovieId}
                                               currentUser={currentUser} onLogout={handleLogout} />}
@@ -128,7 +132,7 @@ export default function App() {
                             <EditProfilePage setView={navigateTo} currentUser={currentUser}
                                              setCurrentUser={setCurrentUser} onLogout={handleLogout} />}
 
-                        {(view === 'to_watch' || view === 'my_reviews' || view === 'my_watched') && (
+                        {(view === 'to_watch' || view === 'my_watched') && (
                             <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
                                 <Navbar setView={navigateTo} activePage={view} currentUser={currentUser}
                                         onLogout={handleLogout} />
