@@ -9,6 +9,7 @@ backend/.mvn/wrapper/maven-wrapper.jar
 backend/src/main/resources/application-local.properties
 
 backend/node_modules/
+cypress-tests/node_modules/
 
 
 ### STS ###
