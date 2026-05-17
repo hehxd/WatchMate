@@ -117,9 +117,6 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
 
     return (
         <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
-
-            <Navbar setView={setView} activePage="movie_details" currentUser={currentUser}/>
-
             <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-12">
 
                 <button
@@ -129,13 +126,10 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                     <span className="mr-2 group-hover:-translate-x-1 transition-transform">←</span> Back to Dashboard
                 </button>
 
-                <div
-                    className="flex flex-col md:flex-row gap-10 mb-20 bg-white/5 p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                    <div
-                        className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+                <div className="flex flex-col md:flex-row gap-10 mb-20 bg-white/5 p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-96 h-96 bg-red-500/10 blur-[100px] rounded-full pointer-events-none"></div>
 
-                    <div
-                        className="w-full md:w-72 h-[26rem] bg-[#0a0a0a] border border-white/10 rounded-3xl flex items-center justify-center shadow-2xl flex-shrink-0 overflow-hidden relative z-10 group">
+                    <div className="w-full md:w-72 h-[26rem] bg-[#0a0a0a] border border-white/10 rounded-3xl flex items-center justify-center shadow-2xl flex-shrink-0 overflow-hidden relative z-10 group">
                         {title.posterUrl
                             ? <img src={title.posterUrl} alt={title.title}
                                    className="w-full h-full object-cover rounded-3xl group-hover:scale-105 transition-transform duration-700"/>
@@ -145,17 +139,14 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
 
                     <div className="flex flex-col justify-center relative z-10 py-4">
                         <div className="flex items-center gap-3 mb-4 flex-wrap">
-                            <span
-                                className="px-4 py-1.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-red-500/20">
+                            <span className="px-4 py-1.5 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-red-500/20">
                                 {title.type}
                             </span>
-                            <span
-                                className="text-gray-300 font-bold px-3 py-1.5 bg-white/10 rounded-xl border border-white/10 text-xs tracking-wider">
+                            <span className="text-gray-300 font-bold px-3 py-1.5 bg-white/10 rounded-xl border border-white/10 text-xs tracking-wider">
                                 {title.yearText}
                             </span>
                             {title.imdbRating && (
-                                <span
-                                    className="text-yellow-400 font-bold text-xs px-3 py-1.5 bg-yellow-400/10 rounded-xl border border-yellow-400/20 flex items-center gap-1">
+                                <span className="text-yellow-400 font-bold text-xs px-3 py-1.5 bg-yellow-400/10 rounded-xl border border-yellow-400/20 flex items-center gap-1">
                                     ⭐ {title.imdbRating}
                                 </span>
                             )}
@@ -213,23 +204,19 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                                         <div key={review.id}
                                              className="p-8 bg-gradient-to-br from-white/10 to-white/5 rounded-[2rem] border border-white/10 hover:border-red-500/30 transition-all duration-300 flex flex-col justify-between shadow-xl hover:-translate-y-1 group">
                                             <div className="flex items-center gap-4 mb-6">
-                                                <div
-                                                    className="w-12 h-12 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-sm font-black text-white uppercase shadow-lg shadow-red-500/30">
+                                                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-sm font-black text-white uppercase shadow-lg shadow-red-500/30">
                                                     {reviewerName[0]?.toUpperCase() || '?'}
                                                 </div>
                                                 <div>
                                                     <span className="text-lg font-bold text-white block">
                                                         {reviewerName}
                                                     </span>
-                                                    <span
-                                                        className="text-xs text-red-400 font-bold uppercase tracking-wider">Reviewer</span>
+                                                    <span className="text-xs text-red-400 font-bold uppercase tracking-wider">Reviewer</span>
                                                 </div>
                                             </div>
 
-                                            <div
-                                                className="bg-[#0a0a0a]/80 backdrop-blur-md rounded-2xl p-6 border border-white/5 relative group-hover:border-white/10 transition-colors">
-                                                <div
-                                                    className="absolute -top-3 left-8 w-6 h-6 bg-[#0a0a0a]/80 border-t border-l border-white/5 rotate-45"></div>
+                                            <div className="bg-[#0a0a0a]/80 backdrop-blur-md rounded-2xl p-6 border border-white/5 relative group-hover:border-white/10 transition-colors">
+                                                <div className="absolute -top-3 left-8 w-6 h-6 bg-[#0a0a0a]/80 border-t border-l border-white/5 rotate-45"></div>
                                                 <p className="text-base text-gray-300 italic relative z-10 leading-relaxed font-medium">
                                                     "{reviewText}"
                                                 </p>
@@ -239,13 +226,11 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                                 })}
                             </div>
                         ) : (
-                            <div
-                                className="text-center py-20 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[3rem]">
+                            <div className="text-center py-20 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[3rem]">
                                 <div className="text-6xl mb-6 opacity-30">📭</div>
                                 <h3 className="text-2xl font-bold text-white mb-3 opacity-90">It's quiet here...</h3>
                                 <p className="text-gray-400 max-w-md mx-auto text-lg">
-                                    None of your friends have rated <span
-                                    className="text-white font-bold">{title.title}</span> yet.
+                                    None of your friends have rated <span className="text-white font-bold">{title.title}</span> yet.
                                 </p>
                             </div>
                         )}
@@ -259,13 +244,11 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                                 </h2>
                             </div>
 
-                            <div
-                                className="p-10 bg-gradient-to-r from-red-900/20 via-white/5 to-transparent rounded-[2.5rem] border border-red-500/30 relative overflow-hidden shadow-2xl">
+                            <div className="p-10 bg-gradient-to-r from-red-900/20 via-white/5 to-transparent rounded-[2.5rem] border border-red-500/30 relative overflow-hidden shadow-2xl">
                                 <div className="absolute top-0 left-0 w-2 h-full bg-red-500"></div>
 
                                 <div className="flex items-center gap-4 mb-6">
-                                    <div
-                                        className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center text-xl font-black uppercase ring-4 ring-red-500/20">
+                                    <div className="w-14 h-14 rounded-full bg-red-500 text-white flex items-center justify-center text-xl font-black uppercase ring-4 ring-red-500/20">
                                         {activeUserName[0]?.toUpperCase() || '?'}
                                     </div>
                                     <div>
@@ -273,14 +256,12 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                                             <span className="text-xl font-black text-white block">
                                                 {activeUserName}
                                             </span>
-                                            <span
-                                                className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-lg uppercase tracking-widest font-bold">You</span>
+                                            <span className="text-[10px] bg-red-500 text-white px-2 py-1 rounded-lg uppercase tracking-widest font-bold">You</span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div
-                                    className="bg-[#0a0a0a]/60 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
+                                <div className="bg-[#0a0a0a]/60 backdrop-blur-sm rounded-3xl p-8 border border-white/10">
                                     <p className="text-lg text-white italic leading-relaxed">
                                         "{myReview.commentText || 'No comment provided.'}"
                                     </p>
@@ -290,15 +271,12 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                     )}
 
                     {!hasReviewed && (
-                        <div
-                            className="mt-12 p-10 bg-gradient-to-br from-white/10 to-white/5 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
-                            <div
-                                className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[80px] rounded-full pointer-events-none"></div>
+                        <div className="mt-12 p-10 bg-gradient-to-br from-white/10 to-white/5 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[80px] rounded-full pointer-events-none"></div>
 
                             <div className="relative z-10">
                                 <h3 className="text-2xl font-bold text-white mb-2">Share Your Thoughts</h3>
-                                <p className="text-gray-400 mb-8">What did you think about {title.title}? Leave a review
-                                    for your friends.</p>
+                                <p className="text-gray-400 mb-8">What did you think about {title.title}? Leave a review for your friends.</p>
 
                                 <form onSubmit={handleReviewSubmit} className="flex flex-col gap-6">
                                     <textarea
@@ -314,7 +292,7 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                                         <button
                                             type="submit"
                                             disabled={isSubmitting || !isReviewValid}
-                                            className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 disabled:opacity-50 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed disabled:hover:-translate-y-0 disabled:shadow-none text-white font-black rounded-2xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-1 text-lg"
+                                            className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 disabled:opacity-50 disabled:from-gray-800 disabled:to-gray-800 disabled:text-gray-500 disabled:cursor-not-allowed disabled:shadow-none text-white font-black rounded-2xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-1 text-lg"
                                         >
                                             {isSubmitting ? 'Posting...' : 'Publish Review'}
                                         </button>

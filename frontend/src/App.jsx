@@ -10,12 +10,16 @@ import MyReviewsPage from './pages/MyReviewsPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
 import Navbar from './components/Navbar';
+import ComingSoonPlaceholder from './components/ComingSoonPlaceholder';
 import { authFetch } from './api/api';
 
+
 export default function App() {
-    const protectedLayout = ['dashboard', 'movie_details', 'friends_reviews',
-        'profile', 'edit_profile', 'to_watch',
-        'my_reviews', 'my_watched'];
+    const protectedLayout = [
+        'dashboard', 'movie_details', 'friends_reviews',
+        'profile', 'edit_profile', 'watch_later',
+        'my_reviews', 'my_watched', 'watching_currently'
+    ];
 
     const [view, setView] = useState(() => {
         const savedView = localStorage.getItem('watchmate_view') || 'landing';
@@ -112,41 +116,33 @@ export default function App() {
 
             <div className="flex-grow flex flex-col relative z-10 w-full">
                 {protectedLayout.includes(view) ? (
-                    <div className="overflow-y-auto h-screen w-full">
-                        {view === 'dashboard' &&
-                            <DashboardPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                           movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
-                        {view === 'friends_reviews' &&
-                            <FriendsReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                                movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
-                        {view === 'my_reviews' &&
-                            <MyReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                           movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
-                        {view === 'movie_details' &&
-                            <MovieDetailsPage setView={navigateTo} movieId={selectedMovieId}
-                                              currentUser={currentUser} onLogout={handleLogout} />}
-                        {view === 'profile' &&
-                            <ProfilePage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
-                                         movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
-                        {view === 'edit_profile' &&
-                            <EditProfilePage setView={navigateTo} currentUser={currentUser}
-                                             setCurrentUser={setCurrentUser} onLogout={handleLogout} />}
+                    <div className="flex flex-col h-screen w-full">
+                        <Navbar setView={navigateTo} activePage={view} currentUser={currentUser} onLogout={handleLogout} />
 
-                        {(view === 'to_watch' || view === 'my_watched') && (
-                            <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
-                                <Navbar setView={navigateTo} activePage={view} currentUser={currentUser}
-                                        onLogout={handleLogout} />
-                                <main className="flex-grow flex flex-col items-center justify-center text-center p-6">
-                                    <div className="text-6xl mb-4">🚧</div>
-                                    <h1 className="text-3xl font-black text-white mb-2">Coming Soon</h1>
-                                    <p className="text-gray-400 mb-6">This feature is currently under development.</p>
-                                    <button onClick={() => navigateTo('dashboard')}
-                                            className="px-6 py-3 bg-red-600 hover:bg-red-500 rounded-xl font-bold text-white transition-all">
-                                        Back to Dashboard
-                                    </button>
-                                </main>
-                            </div>
-                        )}
+                        <div className="overflow-y-auto flex-grow w-full">
+                            {view === 'dashboard' &&
+                                <DashboardPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
+                                               movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
+                            {view === 'friends_reviews' &&
+                                <FriendsReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
+                                                    movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
+                            {view === 'my_reviews' &&
+                                <MyReviewsPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
+                                               movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
+                            {view === 'movie_details' &&
+                                <MovieDetailsPage setView={navigateTo} movieId={selectedMovieId}
+                                                  currentUser={currentUser} onLogout={handleLogout} />}
+                            {view === 'profile' &&
+                                <ProfilePage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
+                                             movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
+                            {view === 'edit_profile' &&
+                                <EditProfilePage setView={navigateTo} currentUser={currentUser}
+                                                 setCurrentUser={setCurrentUser} onLogout={handleLogout} />}
+
+                            {(view === 'watching_currently' || view === 'watch_later' || view === 'my_watched') && (
+                                <ComingSoonPlaceholder setView={navigateTo} />
+                            )}
+                        </div>
                     </div>
                 ) : (
                     <div className="relative flex items-center justify-center flex-grow h-screen">
