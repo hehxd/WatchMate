@@ -2,9 +2,9 @@ import {useState, useEffect, useRef} from 'react';
 import Navbar from '../components/Navbar';
 import {authFetch} from '../api/api';
 
-export default function FriendsReviewsPage({setView, setSelectedMovieId, movies = [], currentUser, onLogout}) {
+export default function MyReviewsPage({setView, setSelectedMovieId, movies = [], currentUser, onLogout}) {
     const [filter, setFilter] = useState('ALL');
-    const [reviewedMovies, setReviewedMovies] = useState([]);
+    const [myReviewedMovies, setMyReviewedMovies] = useState([]);
     const fetchedRef = useRef(false);
 
     useEffect(() => {
@@ -25,10 +25,10 @@ export default function FriendsReviewsPage({setView, setSelectedMovieId, movies 
                             const reviews = await res.json();
 
                             if (reviews.length > 0) {
-                                const friendsReviews = reviews.filter(review => review.username !== currentUser.name);
+                                const myOwnReviews = reviews.filter(review => review.username === currentUser.name);
 
-                                if (friendsReviews.length > 0) {
-                                    return {movie, reviews: friendsReviews};
+                                if (myOwnReviews.length > 0) {
+                                    return {movie, reviews: myOwnReviews};
                                 }
                             }
                         }
@@ -38,32 +38,34 @@ export default function FriendsReviewsPage({setView, setSelectedMovieId, movies 
                 })
             );
 
-            setReviewedMovies(results.filter(Boolean));
+            setMyReviewedMovies(results.filter(Boolean));
         };
 
         fetchReviews();
     }, [movies, currentUser]);
 
-    const filteredReviewedMovies = filter === 'ALL'
-        ? reviewedMovies
-        : reviewedMovies.filter(rm => rm.movie.type === filter);
+    const filteredMyMovies = filter === 'ALL'
+        ? myReviewedMovies
+        : myReviewedMovies.filter(rm => rm.movie.type === filter);
 
     const handleMovieClick = (movie) => {
         setSelectedMovieId(movie.id);
         setView('movie_details');
     };
 
+    const initials = currentUser?.name ? currentUser.name[0] : 'U';
+
     return (
         <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
 
-            <Navbar setView={setView} activePage="friends_reviews" currentUser={currentUser} onLogout={onLogout}/>
+            <Navbar setView={setView} activePage="my_reviews" currentUser={currentUser} onLogout={onLogout}/>
 
             <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-12">
                 <div
                     className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-white/10 pb-6">
                     <div>
-                        <h1 className="text-4xl font-black text-white mb-2">Friends' Reviews</h1>
-                        <p className="text-gray-400 text-lg">See what your friends are saying about these titles.</p>
+                        <h1 className="text-4xl font-black text-white mb-2">My Reviews</h1>
+                        <p className="text-gray-400 text-lg">Keep track of everything you have watched and reviewed.</p>
                     </div>
                     <div className="flex bg-[#0a0a0a]/60 border border-white/5 rounded-xl p-1 backdrop-blur-md">
                         {['ALL', 'MOVIE', 'SERIES'].map(type => (
@@ -79,10 +81,9 @@ export default function FriendsReviewsPage({setView, setSelectedMovieId, movies 
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {filteredReviewedMovies.length > 0 ? (
-                        filteredReviewedMovies.map(({movie, reviews}) => {
+                    {filteredMyMovies.length > 0 ? (
+                        filteredMyMovies.map(({movie, reviews}) => {
                             const latestReview = reviews[reviews.length - 1];
-                            const reviewerName = latestReview.username || 'Anonymous';
                             const reviewText = latestReview.commentText || 'No comment provided.';
 
                             return (
@@ -129,13 +130,11 @@ export default function FriendsReviewsPage({setView, setSelectedMovieId, movies 
                                             <div className="mt-2 flex items-center gap-1.5">
                                                 <div
                                                     className="w-5 h-5 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-[10px] font-black text-white uppercase flex-shrink-0">
-                                                    {reviewerName[0]?.toUpperCase() || '?'}
+                                                    {initials?.toUpperCase()}
                                                 </div>
-                                                <span className="text-xs font-bold text-red-400">{reviewerName}</span>
-                                                {reviews.length > 1 && (
-                                                    <span
-                                                        className="ml-auto text-[10px] text-gray-600">+{reviews.length - 1} more</span>
-                                                )}
+                                                <span className="text-xs font-bold text-white">{currentUser.name}</span>
+                                                <span
+                                                    className="text-[10px] bg-red-500 text-white px-1.5 py-0.5 rounded-md uppercase tracking-widest font-bold scale-90 origin-left">You</span>
                                             </div>
                                         </div>
                                     </div>
@@ -145,10 +144,10 @@ export default function FriendsReviewsPage({setView, setSelectedMovieId, movies 
                     ) : (
                         <div
                             className="col-span-full text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
-                            <div className="text-5xl mb-4 opacity-30">👥</div>
-                            <p className="text-gray-400 font-bold text-lg mb-1">No friends' reviews found.</p>
-                            <p className="text-sm text-gray-500">Wait for your friends to review some titles, or adjust
-                                your filter!</p>
+                            <div className="text-5xl mb-4 opacity-30">🍿</div>
+                            <p className="text-gray-400 font-bold text-lg mb-1">You haven't written any reviews yet.</p>
+                            <p className="text-sm text-gray-500">Go to any title and publish a review to see it listed
+                                here!</p>
                         </div>
                     )}
                 </div>
