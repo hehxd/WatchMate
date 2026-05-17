@@ -9,10 +9,10 @@ import FriendsReviewsPage from './pages/FriendsReviewsPage';
 import MyReviewsPage from './pages/MyReviewsPage';
 import ProfilePage from './pages/ProfilePage';
 import EditProfilePage from './pages/EditProfilePage';
+import WatchLaterPage from './pages/WatchLaterPage';
 import Navbar from './components/Navbar';
 import ComingSoonPlaceholder from './components/ComingSoonPlaceholder';
 import { authFetch } from './api/api';
-
 
 export default function App() {
     const protectedLayout = [
@@ -139,7 +139,11 @@ export default function App() {
                                 <EditProfilePage setView={navigateTo} currentUser={currentUser}
                                                  setCurrentUser={setCurrentUser} onLogout={handleLogout} />}
 
-                            {(view === 'watching_currently' || view === 'watch_later' || view === 'my_watched') && (
+                            {view === 'watch_later' &&
+                                <WatchLaterPage setView={navigateTo} setSelectedMovieId={setSelectedMovieId}
+                                                movies={moviesDB} currentUser={currentUser} onLogout={handleLogout} />}
+
+                            {(view === 'watching_currently' || view === 'my_watched') && (
                                 <ComingSoonPlaceholder setView={navigateTo} />
                             )}
                         </div>

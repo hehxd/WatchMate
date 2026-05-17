@@ -16,6 +16,11 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
     useEffect(() => {
         if (!movieId) return;
 
+        const savedWatchList = JSON.parse(localStorage.getItem('watchmate_watch_later') || '[]');
+        if (savedWatchList.includes(String(movieId))) {
+            setIsToWatch(true);
+        }
+
         const fetchTitleData = async () => {
             try {
                 setLoading(true);
@@ -54,15 +59,31 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
 
     const handleToggleToWatch = () => {
         if (isWatched) return;
+
+        const savedWatchList = JSON.parse(localStorage.getItem('watchmate_watch_later') || '[]');
+        let newList;
+
+        if (isToWatch) {
+            newList = savedWatchList.filter(id => id !== String(movieId));
+        } else {
+            newList = [...savedWatchList, String(movieId)];
+        }
+
+        localStorage.setItem('watchmate_watch_later', JSON.stringify(newList));
         setIsToWatch(!isToWatch);
     };
 
     const handleToggleWatched = () => {
-        if (hasReviewed) return;
-        const newWatchedState = !isWatched;
+        if (hasReviewed || isWatched) return;
+
+        const newWatchedState = true;
         setIsWatched(newWatchedState);
+
         if (newWatchedState) {
             setIsToWatch(false);
+            const savedWatchList = JSON.parse(localStorage.getItem('watchmate_watch_later') || '[]');
+            const newList = savedWatchList.filter(id => id !== String(movieId));
+            localStorage.setItem('watchmate_watch_later', JSON.stringify(newList));
         }
     };
 
@@ -73,8 +94,9 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
         try {
             const res = await authFetch('/reviews', {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    titleId: movieId,
+                    titleId: Number(movieId),
                     commentText: reviewText
                 })
             });
@@ -85,6 +107,7 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                 setReviewText('');
             }
         } catch (err) {
+            console.error(err);
         } finally {
             setIsSubmitting(false);
         }
@@ -171,15 +194,11 @@ export default function MovieDetailsPage({ setView, movieId, currentUser }) {
                             </button>
 
                             <button
-                                onClick={handleToggleWatched}
-                                disabled={hasReviewed}
-                                className={`px-8 py-4 font-bold rounded-2xl border transition-all flex items-center gap-3 shadow-lg ${
-                                    isWatched
-                                        ? 'bg-red-900/40 text-red-300 border-red-500/30'
-                                        : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/30 hover:text-white'
-                                } ${hasReviewed ? 'cursor-not-allowed opacity-80' : ''}`}
+                                disabled={true}
+                                title="Work in progress"
+                                className="px-8 py-4 font-bold rounded-2xl border transition-all flex items-center gap-3 shadow-lg bg-white/5 text-gray-500 border-white/5 cursor-not-allowed opacity-50"
                             >
-                                <span className="text-xl">👁️‍🗨️</span> {isWatched ? 'Watched' : 'Mark as Watched'}
+                                <span className="text-xl">👁️‍🗨️</span> Mark as Watched
                             </button>
                         </div>
                     </div>
