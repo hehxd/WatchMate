@@ -1,8 +1,8 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
-import {authFetch} from '../api/api';
+import { authFetch } from '../api/api';
 
-export default function MovieDetailsPage({setView, movieId, currentUser}) {
+export default function MovieDetailsPage({ setView, movieId, currentUser }) {
     const [title, setTitle] = useState(null);
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -89,6 +89,9 @@ export default function MovieDetailsPage({setView, movieId, currentUser}) {
             setIsSubmitting(false);
         }
     };
+
+    const currentWordCount = reviewText.trim().split(/\s+/).filter(word => word.length > 0).length;
+    const isReviewValid = currentWordCount >= 5;
 
     if (loading) return (
         <div className="text-white p-10 flex justify-center items-center h-screen">
@@ -301,14 +304,17 @@ export default function MovieDetailsPage({setView, movieId, currentUser}) {
                                     <textarea
                                         value={reviewText}
                                         onChange={(e) => setReviewText(e.target.value)}
-                                        placeholder="Write your review here... (Leave empty to test validation)"
+                                        placeholder="Write your review here... (Minimum 5 words required)"
                                         className="w-full bg-[#0a0a0a] text-white border border-white/10 rounded-2xl p-6 min-h-[160px] focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all resize-y text-lg placeholder:text-gray-600 shadow-inner"
                                     />
-                                    <div className="flex justify-end">
+                                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                        <span className={`text-sm font-bold ${isReviewValid ? 'text-green-400' : 'text-gray-500'}`}>
+                                            {currentWordCount} / 5 words minimum
+                                        </span>
                                         <button
                                             type="submit"
-                                            disabled={isSubmitting}
-                                            className="px-10 py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 disabled:opacity-50 disabled:from-red-600 text-white font-black rounded-2xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-1 text-lg"
+                                            disabled={isSubmitting || !isReviewValid}
+                                            className="w-full sm:w-auto px-10 py-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 disabled:opacity-50 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed disabled:hover:-translate-y-0 disabled:shadow-none text-white font-black rounded-2xl transition-all shadow-lg shadow-red-500/25 hover:shadow-red-500/40 hover:-translate-y-1 text-lg"
                                         >
                                             {isSubmitting ? 'Posting...' : 'Publish Review'}
                                         </button>
