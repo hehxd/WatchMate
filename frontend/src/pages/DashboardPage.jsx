@@ -1,8 +1,7 @@
-import {useState, useEffect, useRef} from 'react';
-import Navbar from '../components/Navbar';
-import {authFetch} from '../api/api';
+import { useState, useEffect, useRef } from 'react';
+import { authFetch } from '../api/api';
 
-export default function DashboardPage({setView, setSelectedMovieId, movies = [], currentUser, onLogout}) {
+export default function DashboardPage({ setView, setSelectedMovieId, movies = [], currentUser }) {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchType, setSearchType] = useState('ALL');
     const [watchingList, setWatchingList] = useState([]);
@@ -31,7 +30,7 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                 if (reviews.length > 0) {
                                     const friendsReviews = reviews.filter(review => review.username !== currentUser.name);
                                     if (friendsReviews.length > 0) {
-                                        return {movie, reviews: friendsReviews};
+                                        return { movie, reviews: friendsReviews };
                                     }
                                 }
                             }
@@ -80,7 +79,7 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
 
         const fetchSearchResultsReviews = async () => {
             const visibleResults = searchResults.slice(0, 10);
-            const newSearchReviews = {...searchReviews};
+            const newSearchReviews = { ...searchReviews };
 
             await Promise.all(
                 visibleResults.map(async (movie) => {
@@ -127,15 +126,11 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
 
     return (
         <div className="relative z-10 w-full min-h-screen flex flex-col animate-fade-in">
-
-            <Navbar setView={setView} activePage="dashboard" currentUser={currentUser} onLogout={onLogout}/>
-
             <main className="flex-grow max-w-5xl mx-auto w-full px-6 py-12">
 
                 <div className="mb-12">
                     <h1 className="text-4xl font-black text-white mb-6">Welcome Back!</h1>
-                    <div
-                        className="flex flex-col md:flex-row gap-4 items-stretch md:items-center bg-white/5 p-3 rounded-[2rem] border border-white/10 shadow-2xl backdrop-blur-md">
+                    <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center bg-white/5 p-3 rounded-[2rem] border border-white/10 shadow-2xl backdrop-blur-md">
                         <div className="relative flex-grow">
                             <input
                                 type="text"
@@ -144,10 +139,8 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full px-6 py-4 pl-14 bg-transparent border border-transparent rounded-2xl outline-none transition-all text-white text-lg placeholder:text-gray-500"
                             />
-                            <svg className="w-6 h-6 absolute left-5 top-4 text-gray-500" fill="none"
-                                 stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            <svg className="w-6 h-6 absolute left-5 top-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
                         </div>
                         <div className="flex bg-[#0a0a0a]/60 border border-white/5 rounded-xl p-1">
@@ -188,21 +181,16 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                         <div key={movie.id} onClick={() => handleMovieClick(movie)}
                                              className="bg-white/5 backdrop-blur-md rounded-[2rem] border border-white/10 hover:border-red-500/30 cursor-pointer transition-all duration-300 hover:-translate-y-1 group flex overflow-hidden h-48 shadow-xl">
 
-                                            <div
-                                                className="w-32 flex-shrink-0 bg-[#0a0a0a] relative overflow-hidden rounded-l-[2rem]">
+                                            <div className="w-32 flex-shrink-0 bg-[#0a0a0a] relative overflow-hidden rounded-l-[2rem]">
                                                 {movie.posterUrl ? (
-                                                    <img src={movie.posterUrl} alt={movie.title}
-                                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                                    <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                                 ) : (
-                                                    <div
-                                                        className="w-full h-full flex items-center justify-center bg-white/5 text-3xl border-r border-white/10">🎬</div>
+                                                    <div className="w-full h-full flex items-center justify-center bg-white/5 text-3xl border-r border-white/10">🎬</div>
                                                 )}
-                                                <div
-                                                    className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/90 z-10"></div>
+                                                <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/90 z-10"></div>
                                             </div>
 
-                                            <div
-                                                className="p-5 flex flex-col justify-between flex-grow min-w-0 relative z-10">
+                                            <div className="p-5 flex flex-col justify-between flex-grow min-w-0 relative z-10">
                                                 <div>
                                                     <div className="flex justify-between items-start mb-1">
                                                         <h3 className="font-bold text-lg text-white group-hover:text-red-400 transition-colors truncate pr-2">
@@ -210,31 +198,26 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                                         </h3>
                                                     </div>
                                                     <div className="flex items-center gap-2 mb-3">
-                                                        <span
-                                                            className="text-[10px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-md uppercase tracking-wider font-black">
+                                                        <span className="text-[10px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-md uppercase tracking-wider font-black">
                                                             {movie.type}
                                                         </span>
-                                                        <span
-                                                            className="text-xs text-gray-500 font-medium">{movie.yearText}</span>
+                                                        <span className="text-xs text-gray-500 font-medium">{movie.yearText}</span>
                                                     </div>
                                                 </div>
 
-                                                <div
-                                                    className="bg-[#0a0a0a]/60 backdrop-blur-sm rounded-xl p-3 border border-white/5 relative mt-auto">
-                                                    <div
-                                                        className="absolute -top-2 left-4 w-3 h-3 bg-[#0a0a0a]/60 border-t border-l border-white/5 rotate-45"></div>
+                                                <div className="bg-[#0a0a0a]/60 backdrop-blur-sm rounded-xl p-3 border border-white/5 relative mt-auto">
+                                                    <div className="absolute -top-2 left-4 w-3 h-3 bg-[#0a0a0a]/60 border-t border-l border-white/5 rotate-45"></div>
                                                     {hasReviews ? (
                                                         <>
                                                             <p className="text-sm text-gray-300 italic line-clamp-2 relative z-10 leading-snug">
                                                                 "{reviewText}"
                                                             </p>
                                                             <div className="mt-2 flex items-center gap-1.5">
-                                                                <div
-                                                                    className="w-5 h-5 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-[10px] font-black text-white uppercase flex-shrink-0">
+                                                                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-[10px] font-black text-white uppercase flex-shrink-0">
                                                                     {reviewerName[0]?.toUpperCase() || '?'}
                                                                 </div>
                                                                 <span className="text-xs font-bold text-red-400">
-                                                                    {reviewerName} {reviewerName === currentUser.name && '(You)'}
+                                                                    {reviewerName} {reviewerName === currentUser?.name && '(You)'}
                                                                 </span>
                                                             </div>
                                                         </>
@@ -250,8 +233,7 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                 })}
                             </div>
                         ) : (
-                            <div
-                                className="text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
+                            <div className="text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
                                 <div className="text-5xl mb-4 opacity-40">🍿</div>
                                 <p className="text-gray-400 font-bold text-lg">No matching titles found.</p>
                             </div>
@@ -265,15 +247,14 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                                     <span>👥</span> Friends' Reviews
                                 </h2>
-                                <button onClick={() => setView('friends_reviews')}
-                                        className="text-sm text-red-500 hover:text-white font-bold transition-colors">
+                                <button onClick={() => setView('friends_reviews')} className="text-sm text-red-500 hover:text-white font-bold transition-colors">
                                     See all →
                                 </button>
                             </div>
 
                             {reviewedMovies.length > 0 ? (
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    {reviewedMovies.map(({movie, reviews}) => {
+                                    {reviewedMovies.map(({ movie, reviews }) => {
                                         const latestReview = reviews[reviews.length - 1];
                                         const reviewerName = latestReview.username || 'Anonymous';
                                         const reviewText = latestReview.commentText || 'No comment provided.';
@@ -282,21 +263,16 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                             <div key={movie.id} onClick={() => handleMovieClick(movie)}
                                                  className="bg-white/5 backdrop-blur-md rounded-[2rem] border border-white/10 hover:border-red-500/30 cursor-pointer transition-all duration-300 hover:-translate-y-1 group flex overflow-hidden h-48 shadow-xl">
 
-                                                <div
-                                                    className="w-32 flex-shrink-0 bg-[#0a0a0a] relative overflow-hidden rounded-l-[2rem]">
+                                                <div className="w-32 flex-shrink-0 bg-[#0a0a0a] relative overflow-hidden rounded-l-[2rem]">
                                                     {movie.posterUrl ? (
-                                                        <img src={movie.posterUrl} alt={movie.title}
-                                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                                                        <img src={movie.posterUrl} alt={movie.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
                                                     ) : (
-                                                        <div
-                                                            className="w-full h-full flex items-center justify-center bg-white/5 text-3xl border-r border-white/10">🎬</div>
+                                                        <div className="w-full h-full flex items-center justify-center bg-white/5 text-3xl border-r border-white/10">🎬</div>
                                                     )}
-                                                    <div
-                                                        className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/90 z-10"></div>
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent to-[#0a0a0a]/90 z-10"></div>
                                                 </div>
 
-                                                <div
-                                                    className="p-5 flex flex-col justify-between flex-grow min-w-0 relative z-10">
+                                                <div className="p-5 flex flex-col justify-between flex-grow min-w-0 relative z-10">
                                                     <div>
                                                         <div className="flex justify-between items-start mb-1">
                                                             <h3 className="font-bold text-lg text-white group-hover:text-red-400 transition-colors truncate pr-2">
@@ -304,32 +280,25 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                                             </h3>
                                                         </div>
                                                         <div className="flex items-center gap-2 mb-3">
-                                                            <span
-                                                                className="text-[10px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-md uppercase tracking-wider font-black">
+                                                            <span className="text-[10px] px-2 py-0.5 bg-red-500/20 text-red-400 rounded-md uppercase tracking-wider font-black">
                                                                 {movie.type}
                                                             </span>
-                                                            <span
-                                                                className="text-xs text-gray-500 font-medium">{movie.yearText}</span>
+                                                            <span className="text-xs text-gray-500 font-medium">{movie.yearText}</span>
                                                         </div>
                                                     </div>
 
-                                                    <div
-                                                        className="bg-[#0a0a0a]/60 backdrop-blur-sm rounded-xl p-3 border border-white/5 relative mt-auto">
-                                                        <div
-                                                            className="absolute -top-2 left-4 w-3 h-3 bg-[#0a0a0a]/60 border-t border-l border-white/5 rotate-45"></div>
+                                                    <div className="bg-[#0a0a0a]/60 backdrop-blur-sm rounded-xl p-3 border border-white/5 relative mt-auto">
+                                                        <div className="absolute -top-2 left-4 w-3 h-3 bg-[#0a0a0a]/60 border-t border-l border-white/5 rotate-45"></div>
                                                         <p className="text-sm text-gray-300 italic line-clamp-2 relative z-10 leading-snug">
                                                             "{reviewText}"
                                                         </p>
                                                         <div className="mt-2 flex items-center gap-1.5">
-                                                            <div
-                                                                className="w-5 h-5 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-[10px] font-black text-white uppercase flex-shrink-0">
+                                                            <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-red-600 to-red-400 flex items-center justify-center text-[10px] font-black text-white uppercase flex-shrink-0">
                                                                 {reviewerName[0]?.toUpperCase() || '?'}
                                                             </div>
-                                                            <span
-                                                                className="text-xs font-bold text-red-400">{reviewerName}</span>
+                                                            <span className="text-xs font-bold text-red-400">{reviewerName}</span>
                                                             {reviews.length > 1 && (
-                                                                <span
-                                                                    className="ml-auto text-[10px] text-gray-600">+{reviews.length - 1} more</span>
+                                                                <span className="ml-auto text-[10px] text-gray-600">+{reviews.length - 1} more</span>
                                                             )}
                                                         </div>
                                                     </div>
@@ -339,8 +308,7 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                     })}
                                 </div>
                             ) : (
-                                <div
-                                    className="text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
+                                <div className="text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
                                     <div className="text-5xl mb-4 opacity-30">👥</div>
                                     <p className="text-gray-400 font-bold text-lg mb-1">No friends' reviews yet.</p>
                                     <p className="text-sm text-gray-500">Wait for your friends to review a title!</p>
@@ -353,56 +321,45 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                                     <span>▶️</span> Currently Watching
                                 </h2>
-                                <button onClick={() => setView('my_watched')}
-                                        className="text-sm text-red-500 hover:text-white font-bold transition-colors">
+                                <button onClick={() => setView('my_watched')} className="text-sm text-red-500 hover:text-white font-bold transition-colors">
                                     See all →
                                 </button>
                             </div>
 
                             {watchingList.length > 0 ? (
-                                <div
-                                    className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x snap-mandatory">
+                                <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide snap-x snap-mandatory">
                                     {watchingList.map(item => {
                                         const titleId = item.titleId ?? item.title?.id;
                                         const movie = getMovieById(titleId);
                                         const progress = getProgress(item);
                                         return (
-                                            <div key={item.id}
-                                                 onClick={() => movie && handleMovieClick(movie)}
+                                            <div key={item.id} onClick={() => movie && handleMovieClick(movie)}
                                                  className="flex-none w-[280px] snap-start p-6 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-md rounded-[2rem] border border-white/10 hover:border-red-500/40 cursor-pointer transition-all duration-300 group flex flex-col gap-5 shadow-lg">
 
                                                 <div>
                                                     <h3 className="font-bold text-white group-hover:text-red-400 transition-colors line-clamp-1 text-lg">
                                                         {movie?.title || item.titleTitle || 'Unknown Series'}
                                                     </h3>
-                                                    <span
-                                                        className="text-xs text-gray-500 font-medium">{movie?.yearText}</span>
+                                                    <span className="text-xs text-gray-500 font-medium">{movie?.yearText}</span>
                                                 </div>
 
                                                 <div className="flex items-center gap-3 text-sm">
-                                                    <span
-                                                        className="px-2.5 py-1 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg font-black text-xs tracking-wider shadow-md shadow-red-500/10">
+                                                    <span className="px-2.5 py-1 bg-gradient-to-r from-red-600 to-red-500 text-white rounded-lg font-black text-xs tracking-wider shadow-md shadow-red-500/10">
                                                         S{String(item.currentSeason ?? 1).padStart(2, '0')}
                                                     </span>
                                                     <span className="text-gray-300 font-bold">
                                                         Ep {item.currentEpisode ?? item.watchedEpisodes ?? 0}
-                                                        <span
-                                                            className="text-gray-600"> / {item.totalEpisodes ?? '?'}</span>
+                                                        <span className="text-gray-600"> / {item.totalEpisodes ?? '?'}</span>
                                                     </span>
                                                 </div>
 
                                                 <div>
-                                                    <div
-                                                        className="flex justify-between text-xs text-gray-500 mb-1.5 font-medium">
+                                                    <div className="flex justify-between text-xs text-gray-500 mb-1.5 font-medium">
                                                         <span>Progress</span>
                                                         <span className="text-red-400 font-black">{progress}%</span>
                                                     </div>
-                                                    <div
-                                                        className="w-full h-2 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
-                                                        <div
-                                                            className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"
-                                                            style={{width: `${progress}%`}}
-                                                        />
+                                                    <div className="w-full h-2 bg-white/10 rounded-full overflow-hidden p-0.5 border border-white/5">
+                                                        <div className="h-full bg-gradient-to-r from-red-600 to-red-400 rounded-full transition-all duration-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]" style={{ width: `${progress}%` }} />
                                                     </div>
                                                 </div>
                                             </div>
@@ -410,12 +367,10 @@ export default function DashboardPage({setView, setSelectedMovieId, movies = [],
                                     })}
                                 </div>
                             ) : (
-                                <div
-                                    className="text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
+                                <div className="text-center py-16 bg-gradient-to-b from-white/5 to-transparent border border-dashed border-white/10 rounded-[2.5rem]">
                                     <div className="text-5xl mb-4 opacity-30">🎬</div>
                                     <p className="text-gray-400 font-bold text-lg mb-1">Nothing in progress.</p>
-                                    <p className="text-sm text-gray-500">Start tracking a series to see your progress
-                                        here!</p>
+                                    <p className="text-sm text-gray-500">Start tracking a series to see your progress here!</p>
                                 </div>
                             )}
                         </div>
