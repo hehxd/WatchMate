@@ -15,7 +15,7 @@ describe('Review Tests', () => {
         cy.wait(1000)
 
 
-        cy.get('input[type="text"]').type('Spirited')
+        cy.get('input[type="text"]').type('Game of Thrones')
         cy.wait(500)
         cy.get('.grid > div').first().click()
         cy.url().should('include', 'view=movie_details')
