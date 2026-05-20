@@ -1,12 +1,12 @@
 export class DashboardElements {
     static get elements() {
         return {
-            getNavbar: () => cy.get('nav.w-full'),
-            getDashboardButton: () => cy.contains('button', 'Dashboard'),
+            getDashboardButton: () => cy.contains('button', 'Home'),
             getFriendsReviewsButton: () => cy.contains('button', "Friends' Reviews"),
-            getToWatchButton: () => cy.contains('button', 'To Watch'),
-            getUserAvatar: () => cy.get('div.w-10.h-10.rounded-full.bg-red-900'),
-            getDropdownMenu: () => cy.get('div.absolute.right-0'),
+            getMyReviewsButton: () => cy.contains('button', 'My Reviews'),
+            getWatchNextButton: () => cy.contains('button', 'Watch Next'),
+            getWatchedButton: () => cy.contains('button', 'Watched'),
+            getUserAvatar: () => cy.get('div.flex.items-center.space-x-2').first(),
             getLogoutButton: () => cy.contains('button', 'Secure Logout'),
             getProfileButton: () => cy.contains('button', 'My Profile'),
         }
