@@ -9,6 +9,9 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
     const [searchReviews, setSearchReviews] = useState({});
     const fetchedRef = useRef(false);
 
+    // Track whether the input has been focused or clicked, indicating search view should open
+    const [isSearching, setIsSearching] = useState(false);
+
     useEffect(() => {
         if (movies.length === 0 || !currentUser?.name) return;
 
@@ -68,14 +71,16 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
         fetchWatching();
     }, []);
 
+    // Filters movies. If searchQuery is empty, it returns all movies matching the current type
     const searchResults = movies.filter(movie => {
         const matchesTitle = movie.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesType = searchType === 'ALL' || movie.type === searchType;
         return matchesTitle && matchesType;
     });
 
+    // Fetch reviews for whatever is currently visible in the search results
     useEffect(() => {
-        if (searchQuery === '') return;
+        if (!isSearching) return; // Only fetch if user is interacting with the search system
 
         const fetchSearchResultsReviews = async () => {
             const visibleResults = searchResults.slice(0, 10);
@@ -106,7 +111,7 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
         }, 300);
 
         return () => clearTimeout(delayDebounce);
-    }, [searchQuery, searchType]);
+    }, [searchQuery, searchType, isSearching]);
 
     const handleMovieClick = (movie) => {
         setSelectedMovieId(movie.id);
@@ -136,7 +141,11 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
                                 type="text"
                                 placeholder="Search the database for a movie or show..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => setIsSearching(true)} // User clicked/focused the search bar
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    if (!isSearching) setIsSearching(true);
+                                }}
                                 className="w-full px-6 py-4 pl-14 bg-transparent border border-transparent rounded-2xl outline-none transition-all text-white text-lg placeholder:text-gray-500"
                             />
                             <svg className="w-6 h-6 absolute left-5 top-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +156,10 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
                             {['ALL', 'MOVIE', 'SERIES'].map((type) => (
                                 <button
                                     key={type}
-                                    onClick={() => setSearchType(type)}
+                                    onClick={() => {
+                                        setSearchType(type);
+                                        setIsSearching(true); // Treat clicking type filters as opening search view
+                                    }}
                                     className={`px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
                                         searchType === type
                                             ? 'bg-gradient-to-r from-red-600 to-red-500 text-white shadow-lg shadow-red-500/20'
@@ -159,13 +171,23 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
                             ))}
                         </div>
                     </div>
+                    {/* Optional: Add a "Go Back" button to exit search view when query is empty */}
+                    {isSearching && searchQuery === '' && (
+                        <button
+                            onClick={() => setIsSearching(false)}
+                            className="mt-3 text-sm text-gray-400 hover:text-white transition-colors px-2"
+                        >
+                            ← Back to Dashboard Overview
+                        </button>
+                    )}
                 </div>
 
-                {searchQuery !== '' ? (
+                {/* Changed condition to check for interaction state instead of text presence */}
+                {isSearching ? (
                     <div className="animate-fade-in">
                         <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
                             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
-                                <span>🔍</span> Search Results
+                                <span>🔍</span> {searchQuery === '' ? "All Available Titles" : "Search Results"}
                             </h2>
                         </div>
                         {searchResults.length > 0 ? (
@@ -241,7 +263,7 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
                     </div>
                 ) : (
                     <div className="animate-fade-in space-y-16">
-
+                        {/* Friends Reviews and Currently Watching remain identical */}
                         <div>
                             <div className="flex justify-between items-center border-b border-white/10 pb-4 mb-6">
                                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -374,7 +396,6 @@ export default function DashboardPage({ setView, setSelectedMovieId, movies = []
                                 </div>
                             )}
                         </div>
-
                     </div>
                 )}
             </main>
